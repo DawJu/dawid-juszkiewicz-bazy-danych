@@ -1,0 +1,1 @@
+# dawid-juszkiewicz-bazy-danych

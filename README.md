@@ -1,1 +1,1 @@
-# Repozytorium do zajęć ze statystyki, algebry i baz danych. Autor: Dawid Juszkiewicz
+# Branch do zajęć z baz i źródeł danych, z podziałem na laby.

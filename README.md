@@ -1,1 +1,3 @@
-# Repozytorium do zajęć ze statystyki, algebry i baz danych. Autor: Dawid Juszkiewicz
+# Repozytorium do zadań z zajęć. Autor: Dawid Juszkiewicz
+
+### Zadania z poszczególnych przedmiotów znajdują się na odpowiednich branchach

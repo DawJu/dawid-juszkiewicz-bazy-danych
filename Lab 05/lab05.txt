@@ -1,0 +1,19 @@
+CREATE PROCEDURE add_job(Job_id IN VARCHAR, Job_title IN VARCHAR) IS 
+    BEGIN
+        INSERT INTO jobs(job_id, job_title) VALUES(Job_id, Job_title);
+        EXCEPTION
+            WHEN OTHERS
+            THEN DBMS_OUTPUT.PUT_LINE('Unknown error');
+    END;
+
+BEGIN
+    add_job('JAN', 'Janitor');
+END;
+
+
+CREATE PROCEDURE change_title(id IN NUMBER, Job_title IN VARCHAR) IS
+    BEGIN
+        UPDATE jobs
+        SET jobs.job_title = Job_title
+        WHERE jobs.id = id;
+    END;

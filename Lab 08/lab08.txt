@@ -1,0 +1,18 @@
+CREATE OR REPLACE FUNCTION get_job_title(v_job_id VARCHAR) RETURN VARCHAR IS
+    v_job_title jobs.job_title%TYPE;
+    no_job_found EXCEPTION;
+    BEGIN
+        SELECT job_title INTO v_job_title FROM jobs
+            WHERE job_id = v_job_id;
+        RETURN v_job_title;
+        IF SQL%NOTFOUND THEN RAISE no_job_found;
+        END IF;
+        EXCEPTION
+            WHEN no_job_found THEN
+            RETURN 'No job with the given id';
+    END;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(get_job_title('AC_MGR'));
+    DBMS_OUTPUT.PUT_LINE(get_job_title('ABC'));
+END;

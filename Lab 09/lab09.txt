@@ -1,0 +1,55 @@
+CREATE OR REPLACE FUNCTION yearly_earnings(v_emp_id INT) RETURN FLOAT IS
+    v_salary employees.salary%TYPE;
+    v_commission_pct employees.commission_pct%TYPE;
+    v_yearly_earnings FLOAT;
+    BEGIN
+        SELECT salary, commission_pct INTO v_salary, v_commission_pct
+            FROM employees WHERE employee_id = v_emp_id;
+        v_yearly_earnings := 12 * v_salary + v_salary * v_commission_pct;
+        RETURN v_yearly_earnings;
+    END;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(yearly_earnings(150));
+END;
+
+
+CREATE OR REPLACE FUNCTION number_brackets(v_phone_number VARCHAR) RETURN VARCHAR IS
+    v_new_number VARCHAR(20);
+    v_number_len INT;
+    v_chars INT;
+    BEGIN
+        v_number_len := LENGTH(v_phone_number);
+        v_chars := v_number_len - 9;
+        v_new_number := '(' || SUBSTR(v_phone_number, 1, v_chars) || ')' || SUBSTR(v_phone_number, v_chars + 1);
+        RETURN v_new_number;
+    END;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(number_brackets('+48123456789'));
+    DBMS_OUTPUT.PUT_LINE(number_brackets('+1015321654987'));
+END;
+
+
+CREATE OR REPLACE FUNCTION recapitalize(v_str VARCHAR) RETURN VARCHAR IS
+    v_new_str VARCHAR(100);
+    BEGIN
+        v_new_str := UPPER(SUBSTR(v_str, 1, 1)) || LOWER(SUBSTR(v_str, 2, LENGTH(v_str)-2)) || UPPER(SUBSTR(v_str, -1, 1));
+        RETURN v_new_str;
+    END;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(recapitalize('sdfdfADFEFadadASs'));
+END;
+
+
+CREATE OR REPLACE FUNCTION pesel_to_date(v_pesel VARCHAR) RETURN VARCHAR IS
+    v_date VARCHAR(10);
+    BEGIN
+        v_date := '19' || SUBSTR(v_pesel, 1, 2) || '-' || SUBSTR(v_pesel, 3, 2) || '-' || SUBSTR(v_pesel, 5, 2);
+        RETURN v_date;
+    END;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(pesel_to_date('85120212345'));
+END;

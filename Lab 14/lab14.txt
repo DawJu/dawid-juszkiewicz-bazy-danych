@@ -1,0 +1,167 @@
+CREATE OR REPLACE PACKAGE my_package IS
+    PROCEDURE add_job(Job_id VARCHAR, Job_title VARCHAR);
+    PROCEDURE change_title(v_job_id VARCHAR, v_new_title VARCHAR);
+    PROCEDURE delete_job(v_job_id VARCHAR);
+    PROCEDURE get_employee_salary(emp_id NUMBER, v_name OUT VARCHAR, v_salary OUT NUMBER);
+    FUNCTION get_job_title(v_job_id VARCHAR) RETURN VARCHAR;
+    FUNCTION yearly_earnings(v_emp_id INT) RETURN FLOAT;
+    FUNCTION number_brackets(v_phone_number VARCHAR) RETURN VARCHAR;
+    FUNCTION recapitalize(v_str VARCHAR) RETURN VARCHAR;
+    FUNCTION pesel_to_date(v_pesel VARCHAR) RETURN VARCHAR;
+END my_package;
+
+CREATE OR REPLACE PACKAGE BODY my_package IS
+    PROCEDURE add_job(Job_id VARCHAR, Job_title VARCHAR) IS 
+        BEGIN
+            INSERT INTO jobs(job_id, job_title) VALUES(Job_id, Job_title);
+            EXCEPTION
+                WHEN OTHERS
+                THEN DBMS_OUTPUT.PUT_LINE('Unknown error');
+        END add_job;
+    PROCEDURE change_title(v_job_id VARCHAR, v_new_title VARCHAR) IS
+        error_number error_log.error_number%TYPE;
+        error_info error_log.error_msg%TYPE;
+        no_jobs_updated EXCEPTION;
+        BEGIN
+            UPDATE jobs
+            SET jobs.job_title = v_new_title
+            WHERE jobs.job_id = v_job_id;
+            IF SQL%NOTFOUND THEN RAISE no_jobs_updated;
+            END IF;
+            EXCEPTION
+                WHEN no_jobs_updated THEN
+                error_number := SQLCODE;
+                error_info := SQLERRM;
+                DBMS_OUTPUT.PUT_LINE('Error ' || error_number);
+                INSERT INTO error_log(user_name, error_number, error_msg)
+                VALUES (USER, error_number, error_info);
+        END change_title;
+    PROCEDURE delete_job(v_job_id VARCHAR) IS
+        error_number error_log.error_number%TYPE;
+        error_info error_log.error_msg%TYPE;
+        no_jobs_deleted EXCEPTION;
+        BEGIN
+            DELETE FROM jobs
+            WHERE jobs.job_id = v_job_id;
+            IF SQL%NOTFOUND THEN RAISE no_jobs_deleted;
+            END IF;
+            EXCEPTION
+                WHEN no_jobs_deleted THEN
+                error_number := SQLCODE;
+                error_info := SQLERRM;
+                DBMS_OUTPUT.PUT_LINE('Error ' || error_number);
+                INSERT INTO error_log(user_name, error_number, error_msg)
+                VALUES (USER, error_number, error_info);
+        END delete_job;
+    PROCEDURE get_employee_salary(emp_id NUMBER, v_name OUT VARCHAR, v_salary OUT NUMBER) IS
+        BEGIN
+            SELECT last_name, salary INTO v_name, v_salary FROM employees
+            WHERE employee_id = emp_id;
+        END get_employee_salary;
+    FUNCTION get_job_title(v_job_id VARCHAR) RETURN VARCHAR IS
+        v_job_title jobs.job_title%TYPE;
+        no_job_found EXCEPTION;
+        BEGIN
+            SELECT job_title INTO v_job_title FROM jobs
+                WHERE job_id = v_job_id;
+            RETURN v_job_title;
+            IF SQL%NOTFOUND THEN RAISE no_job_found;
+            END IF;
+            EXCEPTION
+                WHEN no_job_found THEN
+                RETURN 'No job with the given id';
+        END get_job_title;
+    FUNCTION yearly_earnings(v_emp_id INT) RETURN FLOAT IS
+        v_salary employees.salary%TYPE;
+        v_commission_pct employees.commission_pct%TYPE;
+        v_yearly_earnings FLOAT;
+        BEGIN
+            SELECT salary, commission_pct INTO v_salary, v_commission_pct
+                FROM employees WHERE employee_id = v_emp_id;
+            v_yearly_earnings := 12 * v_salary + v_salary * v_commission_pct;
+            RETURN v_yearly_earnings;
+        END yearly_earnings;
+    FUNCTION number_brackets(v_phone_number VARCHAR) RETURN VARCHAR IS
+        v_new_number VARCHAR(20);
+        v_number_len INT;
+        v_chars INT;
+        BEGIN
+            v_number_len := LENGTH(v_phone_number);
+            v_chars := v_number_len - 9;
+            v_new_number := '(' || SUBSTR(v_phone_number, 1, v_chars) || ')' || SUBSTR(v_phone_number, v_chars + 1);
+            RETURN v_new_number;
+        END number_brackets;
+    FUNCTION recapitalize(v_str VARCHAR) RETURN VARCHAR IS
+        v_new_str VARCHAR(100);
+        BEGIN
+            v_new_str := UPPER(SUBSTR(v_str, 1, 1)) || LOWER(SUBSTR(v_str, 2, LENGTH(v_str)-2)) || UPPER(SUBSTR(v_str, -1, 1));
+            RETURN v_new_str;
+        END recapitalize;
+    FUNCTION pesel_to_date(v_pesel VARCHAR) RETURN VARCHAR IS
+        v_date VARCHAR(10);
+        BEGIN
+            v_date := '19' || SUBSTR(v_pesel, 1, 2) || '-' || SUBSTR(v_pesel, 3, 2) || '-' || SUBSTR(v_pesel, 5, 2);
+            RETURN v_date;
+        END pesel_to_date;
+END my_package;
+
+
+
+CREATE OR REPLACE PACKAGE regions_crud IS
+    PROCEDURE create_region(reg_name VARCHAR);
+    PROCEDURE read_regions;
+    PROCEDURE read_region(reg_id NUMBER);
+    PROCEDURE update_region(reg_id NUMBER, new_name VARCHAR);
+    PROCEDURE delete_region(reg_id NUMBER);
+END regions_crud;
+
+CREATE OR REPLACE PACKAGE BODY regions_crud IS
+    PROCEDURE create_region(reg_name VARCHAR) IS
+        BEGIN
+            INSERT INTO regions VALUES(seq_regions_id.nextval, reg_name);
+        END create_region;
+    PROCEDURE read_regions IS
+        CURSOR all_regions IS
+            SELECT region_id, region_name FROM regions;
+            data_row all_regions%ROWTYPE;
+        BEGIN
+            OPEN all_regions;
+            LOOP
+                FETCH all_regions INTO data_row;
+                EXIT WHEN all_regions%NOTFOUND;
+                dbms_output.put_line(data_row.region_id || ' ' || data_row.region_name);
+            END LOOP;
+            CLOSE all_regions;
+        END read_regions;
+    PROCEDURE read_region(reg_id NUMBER) IS
+        reg_name regions.region_name%TYPE;
+        BEGIN
+            SELECT region_name INTO reg_name FROM regions
+            WHERE region_id = reg_id;
+            dbms_output.put_line(reg_name);
+        END read_region;
+    PROCEDURE update_region(reg_id NUMBER, new_name VARCHAR) IS
+        BEGIN
+            UPDATE regions SET region_name = new_name
+            WHERE region_id = reg_id;
+        END update_region;
+    PROCEDURE delete_region(reg_id NUMBER) IS
+        BEGIN
+            DELETE FROM regions WHERE region_id = reg_id;
+        END delete_region;
+END regions_crud;
+
+BEGIN
+    regions_crud.create_region('Mars');
+    regions_crud.read_region(5);
+END;
+
+BEGIN
+    regions_crud.update_region(5, 'Moon');
+    regions_crud.read_region(5);
+END;
+
+BEGIN
+    regions_crud.delete_region(5);
+    regions_crud.read_regions();
+END;

@@ -1,1 +1,1 @@
-# Branch do zajęć ze statystyki i algebry w praktyce, z podziałem na laby.
+# Branch z zadaniami ze statystyki i algebry w praktyce.

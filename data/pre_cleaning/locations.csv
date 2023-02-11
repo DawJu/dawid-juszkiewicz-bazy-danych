@@ -1,0 +1,4 @@
+latitude,longitude,elevation,utc_offset_seconds,timezone,timezone_abbreviation
+53.800003,20.5,133.0,3600,Europe/Warsaw,CET
+52.199997,21.0,113.0,3600,Europe/Warsaw,CET
+51.5,-0.099990845,27.0,0,Europe/London,GMT
